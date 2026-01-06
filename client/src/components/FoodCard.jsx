@@ -1,11 +1,15 @@
+import axios from 'axios'
 import { useContext } from 'react'
 import { ThemeContext } from '../context/ThemeContext'
 
-const FoodCard = ({ food, setFoods }) => {
+const API_URL = 'http://localhost:5000/api/foods'
+
+const FoodCard = ({ food, onDelete }) => {
   const { colors } = useContext(ThemeContext)
 
-  const handleDelete = () => {
-    setFoods(prev => prev.filter(item => item.id !== food.id))
+  const handleDelete = async () => {
+    await axios.delete(`${API_URL}/${food._id}`)
+    onDelete()
   }
 
   return (
@@ -15,16 +19,11 @@ const FoodCard = ({ food, setFoods }) => {
         padding: '1.2rem',
         borderRadius: '0.75rem',
         color: colors.light,
-        width: '16rem',          // ⬅ controls card size
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between'
+        width: '16rem'
       }}
     >
-      <div>
-        <h3>{food.name}</h3>
-        <p>₹ {food.price}</p>
-      </div>
+      <h3>{food.name}</h3>
+      <p>₹ {food.price}</p>
 
       <button
         onClick={handleDelete}

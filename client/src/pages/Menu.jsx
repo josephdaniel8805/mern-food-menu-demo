@@ -1,34 +1,39 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import axios from 'axios'
 import { ThemeContext } from '../context/ThemeContext'
 import FoodCard from '../components/FoodCard'
+
+const API_URL = 'http://localhost:5000/api/foods'
 
 const Menu = () => {
   const { colors } = useContext(ThemeContext)
 
-  const [foods, setFoods] = useState([
-    { id: 1, name: 'Burger', price: 120 },
-    { id: 2, name: 'Pizza', price: 250 }
-  ])
-
+  const [foods, setFoods] = useState([])
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
 
-  const handleAddFood = (e) => {
-    e.preventDefault()
+  // FETCH foods on page load
+  useEffect(() => {
+    fetchFoods()
+  }, [])
 
+  const fetchFoods = async () => {
+    const res = await axios.get(API_URL)
+    setFoods(res.data)
+  }
+
+  const handleAddFood = async (e) => {
+    e.preventDefault()
     if (!name || !price) return
 
-    setFoods(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        name,
-        price: Number(price)
-      }
-    ])
+    await axios.post(API_URL, {
+      name,
+      price: Number(price)
+    })
 
     setName('')
     setPrice('')
+    fetchFoods()
   }
 
   return (
@@ -42,7 +47,6 @@ const Menu = () => {
         padding: '2rem'
       }}
     >
-      {/* Title */}
       <h1 style={{ color: colors.light, marginBottom: '1rem' }}>
         Food Menu
       </h1>
@@ -96,19 +100,13 @@ const Menu = () => {
         </button>
       </form>
 
-      {/* Cards Container */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1.5rem'
-        }}
-      >
+      {/* Cards */}
+      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
         {foods.map(food => (
           <FoodCard
-            key={food.id}
+            key={food._id}
             food={food}
-            setFoods={setFoods}
+            onDelete={fetchFoods}
           />
         ))}
       </div>
